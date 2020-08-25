@@ -7,7 +7,10 @@
     # TODO: Make it version agnostic
     my_version: 3.6.4-1
     my_bucket: nleiva-tower
-    my_python_libraries: [ "boto3", "botocore"]
+    my_python_libraries: [ "boto", "boto3", "botocore"]
+    my_venv: /opt/my-envs/networking
+    # Pass this as an extra var? but we want this for the remote host and not local host.
+    # ansible_python_interpreter=/opt/my-envs/networking/bin/python
 
   tasks:
     - name: Perform backup
@@ -24,7 +27,8 @@
     - name: Ensure botocore and boto3 modules are installed
       pip:
         name: "{{ my_python_libraries }}"
-        extra_args:   "--user"
+        # extra_args:   "--user"
+        virtualenv: "{{ my_venv }}"
 
     - name: Upload backup to S3
       aws_s3:
