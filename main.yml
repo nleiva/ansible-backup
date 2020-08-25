@@ -1,0 +1,30 @@
+---
+- name: NTP Server configuration compliance for Network Elements
+  hosts: "{{ my_devices }}"
+  gather_facts: "{{ my_facts }}"
+  vars:
+    my_user: centos
+    # TODO: Make it version agnostic
+    my_version: 3.6.4-1
+    my_bucket: nleiva-tower
+
+  tasks:
+    - name: Perform backup
+      become: yes
+      command: setup.sh -b
+      args:
+        chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
+
+    - name: Check if backup file exists
+      stat: 
+        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+      register: backup
+
+    - name: Upload backup to S3
+      aws_s3:
+        bucket: "{{ my_bucket }}"
+        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+        object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
+        mode: put
+        metadata: 'Content-Type=application/x-gzip'
+      when: backup.stat.exists == True
