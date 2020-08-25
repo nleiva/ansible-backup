@@ -6,6 +6,7 @@
   vars:
     file: /home/nleiva/tower-backup-latest.tar.gz
     #file: /home/nleiva/Ansible/ansible-backup/test-date.yml
+    mtime: ""
 
   tasks:
     - name: Check if backup file exists
@@ -17,6 +18,7 @@
       set_fact:
         #mtime: "{{ '%Y-%m-%d %H:%M:%S' | strftime(backup.stat.mtime) }}"
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
+      when: backup.stat.exists == True
 
     - name: Print out the date the filed was last modified
       debug:

@@ -9,6 +9,7 @@
     my_bucket: nleiva-tower
     my_python_libraries: [ "boto", "boto3", "botocore"]
     my_venv: /opt/my-envs/networking
+    mtime: ""
     # Pass this as an extra var? but we want this for the remote host and not local host.
     # ansible_python_interpreter=/opt/my-envs/networking/bin/python
 
@@ -21,6 +22,7 @@
     - name: Save backup modified time
       set_fact:
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
+      when: backup.stat.exists == True
 
     - name: Perform backup (if not already created today)
       become: yes
@@ -43,3 +45,5 @@
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists == True
+      delegate_to: localhost
+
