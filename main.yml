@@ -32,6 +32,7 @@
       when: mtime != ansible_date_time.date
 
     - name: Change file ownership and group for Ansible config
+      become: yes
       file:
         path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
         owner: "{{ my_user }}"
