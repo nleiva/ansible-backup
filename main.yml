@@ -46,6 +46,7 @@
         virtualenv: "{{ my_venv }}"
 
     - name: Upload backup to S3
+      become: yes
       aws_s3:
         bucket: "{{ my_bucket }}"
         src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
@@ -53,5 +54,6 @@
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists == True
-      # delegate_to: localhost
+      # I delegate to localhost to use AWS credentials
+      delegate_to: localhost
 
