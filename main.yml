@@ -1,7 +1,7 @@
 ---
 - name: Ansible Tower backup stored in an S3 bucket
   hosts: "{{ my_devices }}"
-  gather_facts: "{{ my_facts }}"
+  gather_facts: yes
   vars:
     my_user: centos
     # TODO: Make it version agnostic
@@ -13,16 +13,21 @@
     # ansible_python_interpreter=/opt/my-envs/networking/bin/python
 
   tasks:
-    - name: Perform backup
+    - name: Check if backup already exists
+      stat: 
+        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+      register: backup
+
+    - name: Save backup modified time
+      set_fact:
+        mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
+
+    - name: Perform backup (if not already created today)
       become: yes
       command: "./setup.sh -b"
       args:
         chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
-
-    - name: Check if backup file exists
-      stat: 
-        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
-      register: backup
+      when: mtime != ansible_date_time.date
 
     - name: Ensure botocore and boto3 modules are installed
       pip:

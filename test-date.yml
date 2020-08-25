@@ -1,0 +1,32 @@
+
+---
+- name: Test if file was modified today
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    file: /home/nleiva/tower-backup-latest.tar.gz
+    #file: /home/nleiva/Ansible/ansible-backup/test-date.yml
+
+  tasks:
+    - name: Check if backup file exists
+      stat: 
+        path: "{{ file }}"
+      register: backup
+
+    - name: Save modified time
+      set_fact:
+        #mtime: "{{ '%Y-%m-%d %H:%M:%S' | strftime(backup.stat.mtime) }}"
+        mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
+
+    - name: Print out the date the filed was last modified
+      debug:
+        var: mtime
+
+    - name: Print the date
+      debug:
+        var: ansible_date_time.date
+
+    - name: Print out only if changed today
+      debug:
+        msg: "Changed today"
+      when: mtime == ansible_date_time.date
