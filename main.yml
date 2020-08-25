@@ -11,7 +11,7 @@
   tasks:
     - name: Perform backup
       become: yes
-      command: setup.sh -b
+      command: ./setup.sh -b
       args:
         chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
 
