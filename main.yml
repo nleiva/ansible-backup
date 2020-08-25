@@ -25,18 +25,18 @@
       when: backup.stat.exists == True
 
     - name: Perform backup (if not already created today)
-      become: yes
+      #become: yes
       command: "./setup.sh -b"
       args:
         chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
       when: mtime != ansible_date_time.date
 
-    - name: Change file ownership and group for Ansible config
-      file:
-        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
-        owner: "{{ my_user }}"
-        group: "{{ my_user }}"
-        mode: u=rw,g=r,o=r
+    # - name: Change file ownership and group for Ansible config
+    #   file:
+    #     path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+    #     owner: "{{ my_user }}"
+    #     group: "{{ my_user }}"
+    #     mode: u=rw,g=r,o=r
 
     - name: Ensure botocore and boto3 modules are installed
       pip:
