@@ -45,11 +45,20 @@
         # extra_args:   "--user"
         virtualenv: "{{ my_venv }}"
 
+    - name: Copy backup
+      become: yes
+      copy:
+        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+        dest: ./temp.file
+        mode: '0755'
+      when: backup.stat.exists == True
+      delegate_to: localhost
+
     - name: Upload backup to S3
       become: yes
       aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+        src: "./temp.file"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
