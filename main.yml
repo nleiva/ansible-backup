@@ -53,6 +53,5 @@
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists == True
-      # awx user needs access to this user file.
-      delegate_to: localhost
+      # delegate_to: localhost
 
