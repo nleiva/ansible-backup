@@ -45,24 +45,15 @@
         # extra_args:   "--user"
         virtualenv: "{{ my_venv }}"
 
-    - name: Copy backup
-      #become: yes
-      copy:
-        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
-        dest: ./temp.file
-        mode: '0755'
-      when: backup.stat.exists == True
-      delegate_to: localhost
-
     - name: Upload backup to S3
-      #become: yes
       aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "./temp.file"
+        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists == True
       # I delegate to localhost to use AWS credentials
+      # awx user should be able to execute /home/centos
       delegate_to: localhost
 
