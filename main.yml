@@ -31,6 +31,13 @@
         chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
       when: mtime != ansible_date_time.date
 
+    - name: Change file ownership and group for Ansible config
+      file:
+        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+        owner: "{{ my_user }}"
+        group: "{{ my_user }}"
+        mode: u=rw,g=r,o=r
+
     - name: Ensure botocore and boto3 modules are installed
       pip:
         name: "{{ my_python_libraries }}"
@@ -45,5 +52,6 @@
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists == True
+      # awx user needs access to this user file.
       delegate_to: localhost
 
