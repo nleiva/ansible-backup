@@ -6,7 +6,7 @@
     user: "{{ my_user }}"
     version: "{{ my_version }}"
     my_bucket: nleiva-tower
-    my_python_libraries: [ "boto", "boto3", "botocore", "libselinux-python"]
+    my_python_libraries: [ "boto", "boto3", "botocore", "libselinux-python3"]
     my_venv: /opt/my-envs/networking
     mtime: ""
     # Pass this as an extra var? but we want this for the remote host and not local host.
