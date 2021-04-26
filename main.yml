@@ -30,39 +30,19 @@
         chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
       when: mtime != ansible_date_time.date
 
-    - name: Change file ownership and group for Ansible backup file
+    - name: Copy backup file to /tmp
+      copy:
+        src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        dest: "/tmp/tower-backup-latest.tar.gz"
+        remote_src: yes
+
+    - name: Change file ownership and group for the Ansible backup file copy
       become: yes
       file:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        path: "/tmp/tower-backup-latest.tar.gz"
         owner: "{{ user }}"
         group: "{{ user }}"
         mode: u=rw,g=r,o=r
-
-    - name: Grant user awx execute access to ec2-user folder
-      acl:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
-        entity: awx
-        etype: user
-        permissions: rx
-        recursive: yes
-        state: present
-
-    - name: Grant user awx execute access to tower-backup folder
-      acl:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
-        entity: awx
-        etype: user
-        permissions: rx
-        recursive: yes
-        state: present
-
-    - name: Grant user awx read access to tower-backup-latest.tar.gz
-      acl:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
-        entity: awx
-        etype: user
-        permissions: r
-        state: present
 
     - name: Ensure botocore and boto3 modules are installed
       pip:
@@ -74,7 +54,7 @@
     - name: Upload backup to S3
       aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        src: "/tmp/tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
