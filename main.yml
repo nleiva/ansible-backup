@@ -38,6 +38,14 @@
         group: "{{ user }}"
         mode: u=rw,g=r,o=r
 
+    - name: Grant user awx read access to tower-backup-latest.tar.gz
+      acl:
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        entity: awx
+        etype: user
+        permissions: r
+        state: present
+
     - name: Ensure botocore and boto3 modules are installed
       pip:
         name: "{{ my_python_libraries }}"
@@ -53,7 +61,7 @@
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       when: backup.stat.exists
-      # I delegate to localhost to use AWS credentials
-      # awx user should be able to execute /home/centos
-      #delegate_to: localhost
+      # IMPORTANT: delegate to localhost to use AWS credentials
+      # IMPORTANT: awx user should be able to execute /home/"{{ user }}"
+      delegate_to: localhost
 
