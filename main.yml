@@ -30,7 +30,7 @@
         chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
       when: mtime != ansible_date_time.date
 
-    - name: Change file ownership and group for Ansible config
+    - name: Change file ownership and group for Ansible backup file
       become: yes
       file:
         path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
@@ -55,5 +55,5 @@
       when: backup.stat.exists
       # I delegate to localhost to use AWS credentials
       # awx user should be able to execute /home/centos
-      delegate_to: localhost
+      #delegate_to: localhost
 
