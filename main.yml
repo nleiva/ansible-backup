@@ -43,6 +43,7 @@
         name: "{{ my_python_libraries }}"
         # extra_args:   "--user"
         virtualenv: "{{ my_venv }}"
+      become: true
 
     - name: Upload backup to S3
       aws_s3:
