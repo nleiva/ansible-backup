@@ -1,5 +1,9 @@
 # Tower Backup
 
+![Ansible Lint](https://github.com/nleiva/ansible-backup/workflows/Ansible%20Lint/badge.svg)
+
+Creates a backup of your Tower setup and uploads it to AWS S3. I run it on a schedule every week.
+
 ## Dependencies:
 
 ### Python libraries
