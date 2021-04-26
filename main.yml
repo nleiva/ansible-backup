@@ -50,7 +50,7 @@
         path: "/tmp/tower-backup-latest.tar.gz"
         owner: "{{ user }}"
         group: "{{ user }}"
-        mode: u=rw,g=r,o=r
+        mode: u=rwx,g=rwx,o=rwx
 
     - name: Upload backup to S3
       aws_s3:
@@ -59,8 +59,9 @@
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
+      # TODO: this check might not be required
       when: backup.stat.exists
       # IMPORTANT: delegate to localhost to use AWS credentials
-      # IMPORTANT: awx user should be able to execute /home/"{{ user }}"
+      # IMPORTANT: awx user should be able to execute the source folder"
       delegate_to: localhost
 
