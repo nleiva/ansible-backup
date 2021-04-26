@@ -6,13 +6,20 @@
     user: "{{ my_user }}"
     version: "{{ my_version }}"
     my_bucket: nleiva-tower
-    my_python_libraries: [ "boto", "boto3", "botocore"]
+    my_python_libraries: [ "boto", "boto3", "botocore", "libselinux-python"]
     my_venv: /opt/my-envs/networking
     mtime: ""
     # Pass this as an extra var? but we want this for the remote host and not local host.
     # ansible_python_interpreter=/opt/my-envs/networking/bin/python
 
   tasks:
+    - name: Ensure Python dependencies are installed
+      pip:
+        name: "{{ my_python_libraries }}"
+        # extra_args:   "--user"
+        virtualenv: "{{ my_venv }}"
+      become: true
+
     - name: Check if backup already exists
       stat:
         path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
@@ -43,13 +50,6 @@
         owner: "{{ user }}"
         group: "{{ user }}"
         mode: u=rw,g=r,o=r
-
-    - name: Ensure botocore and boto3 modules are installed
-      pip:
-        name: "{{ my_python_libraries }}"
-        # extra_args:   "--user"
-        virtualenv: "{{ my_venv }}"
-      become: true
 
     - name: Upload backup to S3
       aws_s3:
