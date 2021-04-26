@@ -46,6 +46,15 @@
         permissions: r
         state: present
 
+    - name: Grant user awx execute access to tower-backup folder
+      acl:
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
+        entity: awx
+        etype: user
+        permissions: x
+        recursive: yes
+        state: present
+
     - name: Ensure botocore and boto3 modules are installed
       pip:
         name: "{{ my_python_libraries }}"
