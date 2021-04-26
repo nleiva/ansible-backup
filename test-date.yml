@@ -10,7 +10,7 @@
 
   tasks:
     - name: Check if backup file exists
-      stat: 
+      stat:
         path: "{{ file }}"
       register: backup
 
@@ -18,7 +18,7 @@
       set_fact:
         #mtime: "{{ '%Y-%m-%d %H:%M:%S' | strftime(backup.stat.mtime) }}"
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
-      when: backup.stat.exists == True
+      when: backup.stat.exists
 
     - name: Print out the date the filed was last modified
       debug:

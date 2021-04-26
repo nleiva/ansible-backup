@@ -3,9 +3,8 @@
   hosts: "{{ my_devices }}"
   gather_facts: yes
   vars:
-    my_user: centos
-    # TODO: Make it version agnostic
-    my_version: 3.6.4-1
+    user: "{{ my_user }}"
+    version: "{{ my_version }}"
     my_bucket: nleiva-tower
     my_python_libraries: [ "boto", "boto3", "botocore"]
     my_venv: /opt/my-envs/networking
@@ -15,28 +14,28 @@
 
   tasks:
     - name: Check if backup already exists
-      stat: 
-        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+      stat:
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
       register: backup
 
     - name: Save backup modified time
       set_fact:
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
-      when: backup.stat.exists == True
+      when: backup.stat.exists
 
     - name: Perform backup (if not already created today)
       become: yes
       command: "./setup.sh -b"
       args:
-        chdir: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}"
+        chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
       when: mtime != ansible_date_time.date
 
     - name: Change file ownership and group for Ansible config
       become: yes
       file:
-        path: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
-        owner: "{{ my_user }}"
-        group: "{{ my_user }}"
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        owner: "{{ user }}"
+        group: "{{ user }}"
         mode: u=rw,g=r,o=r
 
     - name: Ensure botocore and boto3 modules are installed
@@ -48,11 +47,11 @@
     - name: Upload backup to S3
       aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "/home/{{ my_user }}/ansible-tower-setup-{{ my_version }}/tower-backup-latest.tar.gz"
+        src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
-      when: backup.stat.exists == True
+      when: backup.stat.exists
       # I delegate to localhost to use AWS credentials
       # awx user should be able to execute /home/centos
       delegate_to: localhost
