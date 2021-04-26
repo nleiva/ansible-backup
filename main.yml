@@ -38,12 +38,13 @@
         group: "{{ user }}"
         mode: u=rw,g=r,o=r
 
-    - name: Grant user awx read access to tower-backup-latest.tar.gz
+    - name: Grant user awx execute access to ec2-user folder
       acl:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
         entity: awx
         etype: user
-        permissions: r
+        permissions: rx
+        recursive: yes
         state: present
 
     - name: Grant user awx execute access to tower-backup folder
@@ -51,8 +52,16 @@
         path: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
         entity: awx
         etype: user
-        permissions: x
+        permissions: rx
         recursive: yes
+        state: present
+
+    - name: Grant user awx read access to tower-backup-latest.tar.gz
+      acl:
+        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        entity: awx
+        etype: user
+        permissions: r
         state: present
 
     - name: Ensure botocore and boto3 modules are installed
