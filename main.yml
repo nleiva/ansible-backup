@@ -38,12 +38,13 @@
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
-      ansible.builtin.fetch:
+      ansible.builtin.copy:
         src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
         dest: "./tower-backup-latest.tar.gz"
         remote_src: yes
         mode: u=rw,g=r,o=r
       become: yes
+      delegate_to: localhost
 
     # - name: Change file ownership and group for the Ansible backup file copy
     #   become: yes
