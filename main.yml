@@ -11,6 +11,9 @@
     mtime: ""
     # Pass this as an extra var? but we want this for the remote host and not local host.
     # ansible_python_interpreter=/opt/my-envs/networking/bin/python
+  environment:
+    AWS_ACCESS_KEY: "{{ aws_access_key }}"
+    AWS_SECRET_KEY: "{{ aws_secret_key }}"
 
   tasks:
     - name: Ensure Python dependencies are installed
