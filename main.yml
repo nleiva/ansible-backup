@@ -40,11 +40,10 @@
     - name: Copy backup file to /tmp
       ansible.builtin.copy:
         src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
-        dest: "./tower-backup-latest.tar.gz"
+        dest: "/tmp/tower-backup-latest.tar.gz"
         remote_src: yes
         mode: u=rw,g=r,o=r
       become: yes
-      delegate_to: localhost
 
     # - name: Change file ownership and group for the Ansible backup file copy
     #   become: yes
@@ -57,7 +56,7 @@
     - name: Upload backup to S3
       amazon.aws.aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "./tower-backup-latest.tar.gz"
+        src: "/tmp/tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
@@ -65,5 +64,5 @@
       # when: backup.stat.exists
       # IMPORTANT: delegate to localhost to use AWS credentials
       # IMPORTANT: awx user should be able to execute the source folder"
-      delegate_to: localhost
+      # delegate_to: localhost
 
