@@ -49,8 +49,10 @@
       become: yes
       ansible.builtin.file:
         path: "/tmp/tower-backup-latest.tar.gz"
-        owner: "{{ user }}"
-        group: "{{ user }}"
+        #owner: "{{ user }}"
+        #group: "{{ user }}"
+        owner: awx
+        group: awx
         mode: u=rw,g=r,o=r
 
     - name: Upload backup to S3
