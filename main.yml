@@ -31,10 +31,10 @@
       when: backup.stat.exists
 
     - name: Perform backup (if not already created today)
-      become: yes
       ansible.builtin.command: "./setup.sh -b"
       args:
         chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
+      become: yes
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
@@ -43,6 +43,7 @@
         dest: "/tmp/tower-backup-latest.tar.gz"
         remote_src: yes
         mode: u=rw,g=r,o=r
+      become: yes
 
     - name: Change file ownership and group for the Ansible backup file copy
       become: yes
