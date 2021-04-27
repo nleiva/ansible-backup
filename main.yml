@@ -12,8 +12,8 @@
     # Pass this as an extra var? but we want this for the remote host and not local host.
     # ansible_python_interpreter=/opt/my-envs/networking/bin/python
   environment:
-    AWS_ACCESS_KEY_ID: '{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}'
-    AWS_SECRET_ACCESS_KEY: '{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}'
+    AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
   tasks:
     - name: Ensure Python dependencies are installed
