@@ -7,10 +7,8 @@
     version: "{{ my_version }}"
     my_bucket: nleiva-tower
     my_python_libraries: [ "boto", "boto3", "botocore", "selinux"]
-    my_venv: /opt/my-envs/networking
     mtime: ""
-    # Pass this as an extra var? but we want this for the remote host and not local host.
-    # ansible_python_interpreter=/opt/my-envs/networking/bin/python
+  # Pass Ansible Tower AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
   environment:
     AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
@@ -19,8 +17,6 @@
     - name: Ensure Python dependencies are installed
       ansible.builtin.pip:
         name: "{{ my_python_libraries }}"
-        # extra_args:   "--user"
-        # virtualenv: "{{ my_venv }}"
       become: true
 
     - name: Check if backup already exists
@@ -48,14 +44,6 @@
         mode: u=rw,g=r,o=r
       become: yes
 
-    # - name: Change file ownership and group for the Ansible backup file copy
-    #   become: yes
-    #   ansible.builtin.file:
-    #     path: "/tmp/tower-backup-latest.tar.gz"
-    #     owner: "{{ user }}"
-    #     group: "{{ user }}"
-    #     mode: u=rw,g=r,o=r
-
     - name: Upload backup to S3
       amazon.aws.aws_s3:
         bucket: "{{ my_bucket }}"
@@ -63,9 +51,3 @@
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
-      # TODO: this check might not be required
-      # when: backup.stat.exists
-      # IMPORTANT: delegate to localhost to use AWS credentials
-      # IMPORTANT: awx user should be able to execute the source folder"
-      # delegate_to: localhost
-
