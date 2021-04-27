@@ -38,27 +38,25 @@
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
-      ansible.builtin.copy:
+      ansible.builtin.fetch:
         src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
-        dest: "/tmp/tower-backup-latest.tar.gz"
+        dest: "./tower-backup-latest.tar.gz"
         remote_src: yes
         mode: u=rw,g=r,o=r
       become: yes
 
-    - name: Change file ownership and group for the Ansible backup file copy
-      become: yes
-      ansible.builtin.file:
-        path: "/tmp/tower-backup-latest.tar.gz"
-        #owner: "{{ user }}"
-        #group: "{{ user }}"
-        owner: awx
-        group: awx
-        mode: u=rw,g=r,o=r
+    # - name: Change file ownership and group for the Ansible backup file copy
+    #   become: yes
+    #   ansible.builtin.file:
+    #     path: "/tmp/tower-backup-latest.tar.gz"
+    #     owner: "{{ user }}"
+    #     group: "{{ user }}"
+    #     mode: u=rw,g=r,o=r
 
     - name: Upload backup to S3
       amazon.aws.aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "/tmp/tower-backup-latest.tar.gz"
+        src: "./tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
