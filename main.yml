@@ -14,31 +14,31 @@
 
   tasks:
     - name: Ensure Python dependencies are installed
-      pip:
+      ansible.builtin.pip:
         name: "{{ my_python_libraries }}"
         # extra_args:   "--user"
-        virtualenv: "{{ my_venv }}"
+        # virtualenv: "{{ my_venv }}"
       become: true
 
     - name: Check if backup already exists
-      stat:
+      ansible.builtin.stat:
         path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
       register: backup
 
     - name: Save backup modified time
-      set_fact:
+      ansible.builtin.set_fact:
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
       when: backup.stat.exists
 
     - name: Perform backup (if not already created today)
       become: yes
-      command: "./setup.sh -b"
+      ansible.builtin.command: "./setup.sh -b"
       args:
         chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
-      copy:
+      ansible.builtin.copy:
         src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
         dest: "/tmp/tower-backup-latest.tar.gz"
         remote_src: yes
@@ -46,21 +46,21 @@
 
     - name: Change file ownership and group for the Ansible backup file copy
       become: yes
-      file:
+      ansible.builtin.file:
         path: "/tmp/tower-backup-latest.tar.gz"
         owner: "{{ user }}"
         group: "{{ user }}"
-        mode: u=rwx,g=rwx,o=rwx
+        mode: u=rw,g=r,o=r
 
     - name: Upload backup to S3
-      aws_s3:
+      amazon.aws.aws_s3:
         bucket: "{{ my_bucket }}"
         src: "/tmp/tower-backup-latest.tar.gz"
         object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
       # TODO: this check might not be required
-      when: backup.stat.exists
+      # when: backup.stat.exists
       # IMPORTANT: delegate to localhost to use AWS credentials
       # IMPORTANT: awx user should be able to execute the source folder"
       delegate_to: localhost

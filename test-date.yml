@@ -10,25 +10,24 @@
 
   tasks:
     - name: Check if backup file exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ file }}"
       register: backup
 
     - name: Save modified time
-      set_fact:
-        #mtime: "{{ '%Y-%m-%d %H:%M:%S' | strftime(backup.stat.mtime) }}"
+      ansible.builtin.set_fact:
         mtime: "{{ '%Y-%m-%d' | strftime(backup.stat.mtime) }}"
       when: backup.stat.exists
 
     - name: Print out the date the filed was last modified
-      debug:
+      ansible.builtin.debug:
         var: mtime
 
     - name: Print the date
-      debug:
+      ansible.builtin.debug:
         var: ansible_date_time.date
 
     - name: Print out only if changed today
-      debug:
+      ansible.builtin.debug:
         msg: "Changed today"
       when: mtime == ansible_date_time.date
