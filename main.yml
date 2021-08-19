@@ -5,6 +5,7 @@
   vars:
     user: "{{ my_user }}"
     version: "{{ my_version }}"
+    check: true
     my_bucket: nleiva-tower
     my_python_libraries: [ "boto", "boto3", "botocore", "selinux"]
     mtime: ""
@@ -18,6 +19,7 @@
       ansible.builtin.pip:
         name: "{{ my_python_libraries }}"
       become: true
+      when: check
 
     - name: Check if backup already exists
       ansible.builtin.stat:
