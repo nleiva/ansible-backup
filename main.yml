@@ -5,8 +5,9 @@
   vars:
     user: "{{ my_user }}"
     version: "{{ my_version }}"
+    ec2_region: "{{ aws_region | default('us-east-1') }}"
     check: true
-    my_bucket: nleiva-tower
+    my_bucket: nleiva-tower-home
     my_python_libraries: [ "boto", "boto3", "botocore", "selinux"]
     mtime: ""
   # Pass Ansible Tower AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
@@ -45,6 +46,12 @@
         remote_src: yes
         mode: u=rw,g=r,o=r
       become: yes
+
+    - name: Make sure S3 bucket for persistent storage of Backup exists
+      amazon.aws.s3_bucket:
+        name: "{{ my_bucket }}"
+        state: present
+        region: "{{ ec2_region }}"
 
     - name: Upload backup to S3
       amazon.aws.aws_s3:
