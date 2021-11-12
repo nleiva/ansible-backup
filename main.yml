@@ -1,5 +1,5 @@
 ---
-- name: Ansible Tower backup stored in an S3 bucket
+- name: Ansible Automation Platform backup stored in an S3 bucket
   hosts: "{{ my_devices }}"
   gather_facts: yes
   vars:
@@ -8,9 +8,10 @@
     ec2_region: "{{ aws_region | default('us-east-1') }}"
     check: true
     my_bucket: nleiva-tower-home
+    my_folder: "ansible-automation-platform-setup-bundle-{{ version }}-early-access"
     my_python_libraries: [ "boto", "boto3", "botocore", "selinux"]
     mtime: ""
-  # Pass Ansible Tower AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
+  # Pass AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
   environment:
     AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
@@ -24,7 +25,7 @@
 
     - name: Check if backup already exists
       ansible.builtin.stat:
-        path: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
+        path: "/home/{{ user }}/{{ my_folder }}/automation-platform-backup-latest.tar.gz"
       register: backup
 
     - name: Save backup modified time
@@ -35,14 +36,14 @@
     - name: Perform backup (if not already created today)
       ansible.builtin.command: "./setup.sh -b"
       args:
-        chdir: "/home/{{ user }}/ansible-tower-setup-{{ version }}"
+        chdir: "/home/{{ user }}/{{ my_folder }}"
       become: yes
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
       ansible.builtin.copy:
-        src: "/home/{{ user }}/ansible-tower-setup-{{ version }}/tower-backup-latest.tar.gz"
-        dest: "/tmp/tower-backup-latest.tar.gz"
+        src: "/home/{{ user }}/{{ my_folder }}/automation-platform-backup-latest.tar.gz"
+        dest: "/tmp/automation-platform-backup-latest.tar.gz"
         remote_src: yes
         mode: u=rw,g=r,o=r
       become: yes
@@ -56,7 +57,7 @@
     - name: Upload backup to S3
       amazon.aws.aws_s3:
         bucket: "{{ my_bucket }}"
-        src: "/tmp/tower-backup-latest.tar.gz"
-        object: "/backups/tower-backup-{{ ansible_date_time.date }}.tar.gz"
+        src: "/tmp/automation-platform-backup-latest.tar.gz"
+        object: "/backups/automation-platform-backup-{{ ansible_date_time.date }}.tar.gz"
         mode: put
         metadata: 'Content-Type=application/x-gzip'
