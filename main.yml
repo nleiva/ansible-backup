@@ -1,15 +1,13 @@
 ---
 - name: Ansible Automation Platform backup stored in an S3 bucket
   hosts: "{{ my_devices }}"
-  gather_facts: yes
+  gather_facts: true
   vars:
     user: "{{ my_user }}"
     version: "{{ my_version }}"
     ec2_region: "{{ aws_region | default('us-east-1') }}"
-    check: true
-    my_bucket: nleiva-tower-home
-    my_folder: "ansible-automation-platform-setup-bundle-{{ version }}-early-access"
-    my_python_libraries: [ "boto", "boto3", "botocore", "selinux"]
+    my_bucket: nleiva-ansible-controller-home
+    my_folder: "ansible-automation-platform-setup-bundle-{{ version }}"
     mtime: ""
   # Pass AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
   environment:
@@ -17,12 +15,6 @@
     AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
   tasks:
-    - name: Ensure Python dependencies are installed
-      ansible.builtin.pip:
-        name: "{{ my_python_libraries }}"
-      become: true
-      when: check
-
     - name: Check if backup already exists
       ansible.builtin.stat:
         path: "/home/{{ user }}/{{ my_folder }}/automation-platform-backup-latest.tar.gz"
@@ -37,16 +29,16 @@
       ansible.builtin.command: "./setup.sh -b"
       args:
         chdir: "/home/{{ user }}/{{ my_folder }}"
-      become: yes
+      become: true
       when: mtime != ansible_date_time.date
 
     - name: Copy backup file to /tmp
       ansible.builtin.copy:
         src: "/home/{{ user }}/{{ my_folder }}/automation-platform-backup-latest.tar.gz"
         dest: "/tmp/automation-platform-backup-latest.tar.gz"
-        remote_src: yes
+        remote_src: true
         mode: u=rw,g=r,o=r
-      become: yes
+      become: true
 
     - name: Make sure S3 bucket for persistent storage of Backup exists
       amazon.aws.s3_bucket:
