@@ -8,13 +8,21 @@
     ec2_region: "{{ aws_region | default('us-east-1') }}"
     my_bucket: nleiva-ansible-controller-home
     my_folder: "ansible-automation-platform-setup-bundle-{{ version }}"
+    my_python_libraries: ["boto3", "botocore", "selinux"]
     mtime: ""
+    check: true
   # Pass AWS credentials to remote host (is this secure?). The alternative is to run this on localhost.
   environment:
     AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
   tasks:
+    - name: Ensure Python dependencies are installed
+      ansible.builtin.pip:
+        name: "{{ my_python_libraries }}"
+      become: true
+      when: check
+
     - name: Check if backup already exists
       ansible.builtin.stat:
         path: "/home/{{ user }}/{{ my_folder }}/automation-platform-backup-latest.tar.gz"
